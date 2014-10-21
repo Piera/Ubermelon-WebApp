@@ -1,4 +1,4 @@
-from flask import Flask, request, session, render_template, g, redirect, url_for, flash
+from flask import Flask, request, session, render_template, g, redirect, url_for, flash, Markup
 import model
 import jinja2
 import os
@@ -30,13 +30,49 @@ def show_melon(id):
 
 @app.route("/cart")
 def shopping_cart():
+    melon_ids = session['in_cart'].keys()
+    melons = []
+    for melon_id in melon_ids:
+        melon = model.get_melon_by_id(int(melon_id))
+        melon.qty = session['in_cart'][melon_id]
+        melon.total = melon.qty * melon.price
+        print melon.total
+        melons.append(melon)
+
     """TODO: Display the contents of the shopping cart. The shopping cart is a
     list held in the session that contains all the melons to be added. Check
     accompanying screenshots for details."""
-    return render_template("cart.html")
+    return render_template("cart.html", melons=melons)
 
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
+    # melon = model.get_melon_by_id(id)
+    # melon_id = id
+    # session "=" {cart: {2:2, 14:5, 4:1}}
+    id = str(id)
+    if 'in_cart' in session:
+        if id in session['in_cart']:
+            session['in_cart'][id] += 1
+        else:
+            session['in_cart'][id] = 1
+    else:
+        session['in_cart'] = {id : 1}        
+
+
+    # if 'in_cart' not in session:
+    #     # print Markup.escape(str(session))    
+    #     session['in_cart'] = {id:1}
+    # else:
+    #     session['in_cart'][id] += 1
+    #     # if id not in session['in_cart']:
+    #     #     session['in+cart'][id] = 1
+    #     # else:
+    #     #     session['in_cart'][id] += 1
+    flash("added something to cart!")
+    # return Markup.escape(str(session))
+    return redirect(url_for("shopping_cart"))
+    # session['in_cart'] = session.setdefault('in_cart', melon).append(melon)
+
     """TODO: Finish shopping cart functionality using session variables to hold
     cart list.
 
@@ -44,7 +80,7 @@ def add_to_cart(id):
     shopping cart page, while displaying the message
     "Successfully added to cart" """
 
-    return "Oops! This needs to be implemented!"
+    # return "Oops! This needs to be implemented!"
 
 
 @app.route("/login", methods=["GET"])
@@ -54,9 +90,15 @@ def show_login():
 
 @app.route("/login", methods=["POST"])
 def process_login():
+    request.form.get("email","password")
+    print model.get_customer_by_email("email") 
+    # if verify == None:
+    #     flash("Login Successful!")
+    #     return redirect("/melons")
+    # # print customer_name
     """TODO: Receive the user's login credentials located in the 'request.form'
     dictionary, look up the user, and store them in the session."""
-    return "Oops! This needs to be implemented"
+    # return "Oops! This needs to be implemented"
 
 
 @app.route("/checkout")
@@ -69,3 +111,6 @@ def checkout():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=True, port=port)
+
+
+# 990|norma@realmix.com|Nancy|Simmons|c90db659249569db1fb14d9c7a96537a|(352)318-9903||Male|2014-06-03|65498 Bowman Plaza||Calipatria|NC|17797-3626|65498 Bowman Plaza||Calipatria|NC|17797-3626|
