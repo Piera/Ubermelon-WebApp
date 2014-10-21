@@ -90,8 +90,13 @@ def show_login():
 
 @app.route("/login", methods=["POST"])
 def process_login():
-    request.form.get("email","password")
-    print model.get_customer_by_email("email") 
+    email = request.form.get("email")
+    password = request.form.get("password")
+    givenname = model.get_customer_by_email(email) 
+    if givenname:
+        flash("Login Successful!")
+        return redirect("/melons")
+    
     # if verify == None:
     #     flash("Login Successful!")
     #     return redirect("/melons")
